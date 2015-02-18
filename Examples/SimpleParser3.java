@@ -12,8 +12,8 @@
             <expression>  ::=  [ "-" ] <term> [ [ "+" | "-" ] <term> ]...
 
             <term>  ::=  <factor> [ [ "*" | "/" ] <factor> ]...
-			
-			<factor>  ::=  <number>  |  <x-variable>  |  "(" <expression> ")"
+
+            <factor>  ::=  <number>  |  "(" <expression> ")"
 
     A number must begin with a digit (i.e., not a decimal point).
     A line of input must contain exactly one such expression.  If extra
@@ -41,23 +41,9 @@ public class SimpleParser3 {
      *  to be left on the stack).
      */
     abstract private static class ExpNode {
-        abstract double value(double xValue); 
+        abstract double value(); 
         abstract void printStackCommands();
     }
-	
-	private static class VarNode extends ExpNode{
-		
-		double number;
-
-		double value(double xValue){
-			number = xValue;
-			return number;
-		}
-		void printStackCommands(){
-			System.out.println(" Push x = " + number);
-		}
-		
-	}
 
     /**
      * Represents an expression node that holds a number.
@@ -68,7 +54,7 @@ public class SimpleParser3 {
                 // Construct a ConstNode containing the specified number.
             number = val;
         }
-        double value(double xValue) {
+        double value() {
                 // The value of the node is the number that it contains.
             return number;
         }
@@ -94,11 +80,11 @@ public class SimpleParser3 {
             this.left = left;
             this.right = right;
         }
-        double value(double xValue) {
+        double value() {
                 // The value is obtained by evaluating the left and right
                 // operands and combining the values with the operator.
-            double x = left.value(xValue);
-            double y = right.value(xValue);
+            double x = left.value();
+            double y = right.value();
             switch (op) {
             case '+':  return x + y;
             case '-':  return x - y;
@@ -130,9 +116,9 @@ public class SimpleParser3 {
             assert operand != null;
             this.operand = operand;
         }
-        double value(double xValue) {
+        double value() {
                 // The value is the negative of the value of the operand.
-            double neg = operand.value(xValue);
+            double neg = operand.value();
             return -neg;
         }
         void printStackCommands() {
@@ -174,13 +160,9 @@ public class SimpleParser3 {
                 if ( TextIO.peek() != '\n' )
                     throw new ParseError("Extra data after end of expression.");
                 TextIO.getln();
-				
-				for(double i = 1; i < 4; i++){
-	                System.out.println("\nValue is " + exp.value(i));
-	                System.out.println("\nOrder of postfix evaluation is:\n");
-	                exp.printStackCommands();
-				}
-					
+                System.out.println("\nValue is " + exp.value());
+                System.out.println("\nOrder of postfix evaluation is:\n");
+                exp.printStackCommands();
             }
             catch (ParseError e) {
                 System.out.println("\n*** Error in input:    " + e.getMessage());
@@ -264,10 +246,6 @@ public class SimpleParser3 {
             double num = TextIO.getDouble();
             return new ConstNode(num);
         }
-		else if(Character.toLowerCase(ch) == 'x'){
-			TextIO.getChar();
-			return new VarNode();
-		}
         else if ( ch == '(' ) {
                 // The factor is an expression in parentheses.
                 // Return a tree representing that expression.
